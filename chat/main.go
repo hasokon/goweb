@@ -4,30 +4,32 @@ import (
 	"flag"
 	"log"
 	"net/http"
-	"path/filepath"
-	"sync"
-	"text/template"
+	"github.com/stretchr/gomniauth/providers/google"
+	"github.com/stretchr/gomniauth/providers/facebook"
+	"github.com/stretchr/gomniauth/providers/github"
 )
-
-type templateHandler struct {
-	once     sync.Once
-	filename string
-	temp1    *template.Template
-}
-
-func (t *templateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	t.once.Do(func() {
-		t.temp1 =
-			template.Must(template.ParseFiles(filepath.Join("templates", t.filename)))
-	})
-	t.temp1.Execute(w, r)
-}
 
 func main() {
 	addr := flag.String("addr", ":8080", "Apprication's Address")
 	flag.Parse()
+	//Gomniauth Set-up
+	gomniauth.SetSecurityKey("dGhKIuhkmhtqxNNbUuiJNVtgun[;?<,miHNbgojj")
+	gomniauth.WithProviders(
+		facebook.New("","","http://localhost:8080/auth/callback/facebook"),
+		github.New(
+			"aec2bc42117b12eb1328",
+			"56282cd7e64284f019554221fad29d12aca52714",
+			"http://localhost:8080/auth/callback/github"),
+		google.New(
+		"176223784373-bss719fm64msnfuqau908ql7l1es0dcs.apps.googleusercontent.com",
+		"sfxuWz8KldmlBaUOAvyhQQ2e",
+		"http://localhost:8080/auth/callback/google"),
+	)
+
 	r := newRoom()
-	http.Handle("/", &templateHandler{filename: "chat.html"})
+	http.Handle("/chat", MustAuth(&templateHandler{filename: "chat.html"}))
+	http.Handle("/login", &templateHandler{filename: "login.html"})
+	http.HandleFunc("/auth/", loginHandler)
 	http.Handle("/room", r)
 
 	go r.run()
