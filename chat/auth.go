@@ -14,7 +14,7 @@ type authHandler struct {
 }
 
 func (h *authHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if _, err := r.Cookie("auth"); err == http.ErrNoCookie {
+	if cookie, err := r.Cookie("auth"); err == http.ErrNoCookie || cookie.Value == ""{
 		//Uncertified
 		w.Header().Set("Location", "/login")
 		w.WriteHeader(http.StatusTemporaryRedirect)
@@ -70,6 +70,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		authCookieValue := objx.New(map[string]interface{}{
 			"name": user.Name(),
+			"avatar_url" : user.AvatarURL(),
 		}).MustBase64()
 		http.SetCookie(w, &http.Cookie{
 			Name:  "auth",
