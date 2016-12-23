@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/gomniauth/providers/google"
 	"log"
 	"net/http"
-	"./trace"
+	"work/goweb/chat/trace"
 	"os"
 )
 

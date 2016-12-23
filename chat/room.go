@@ -1,7 +1,7 @@
 package main
 
 import (
-	"./trace"
+	"work/goweb/chat/trace"
 	"github.com/gorilla/websocket"
 	"github.com/stretchr/objx"
 	"log"
