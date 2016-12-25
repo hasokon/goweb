@@ -3,25 +3,97 @@
 		<title>Chat</title>
 		<link rel="stylesheet"
 			href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-		<style>
-			ul#messages { list-style: none; }
-			ul#messages li { margin-bottom: 2px; }
-			ul#messages li img { margin-right: 10px; }
+		<style type="text/css">
+		<!--
+		ul#messages { list-style: none;}
+		ul#messages li { margin-bottom: 2px;}
+		ul#messages li img { margin-right: 10px;}
+		body {
+			height: 100%;
+			overflow: hidden;
+		}
+		.bubble {
+			display:inline-block;
+			position: relative;
+			top:15px;
+			padding:1em;
+			border-radius:5px;
+			background: #fff;
+		}
+		.bubble:after {
+			position: absolute;
+			content: " ";
+			height: 0;
+			width: 0;
+		}
+		.bubble-half-left:after {
+			right: 100%;
+			top: 10%;
+			border-top:10px solid #fff;
+			border-left:10px solid transparent;
+		}
+		.icon {
+			border-radius: 30px;
+			-webkit-border-radius: 30px;
+			-moz-border-radius: 30px;
+			position:relative;
+		}
+		.panel-body {
+			height: 70%;
+			overflow-y: auto;
+		}
+		.panel {
+			margin-bottom: 0;
+			margin:0;
+			padding:0;
+		}
+		.header {
+			position: fixed;
+			z-index: 1;
+			top: 0;
+			left: 0;
+			margin:0;
+			width:100%;
+			height: 20px;
+			color:white;
+			background-color:black;
+		}
+		.form-control {
+			float: left;
+			margin:0;
+			width:90%;
+			margin:0;
+			padding:0;
+		}
+		form#chatbox {
+			margin: 0;
+			padding: 0;
+		}
+		input#submit {
+			float: left;
+			width: 10%;
+			margin:0;
+			padding:0;
+		}
+		input#submit:after {
+			clear : both;
+			height: 30px;
+		}
+		-->
 		</style>
 	</head>
 	<body>
 		<div class="constainer">
-			<div class="panel panel-default">
-				<div class="panel-body">
+			<div class="header">
+			User : {{.UserData.name}} / <a href="/logout">Sign Out</a>
+			</div>
+			<div class="panel panel-default" style="margin-top:20px;">
+				<div class="panel-body" id="preview" style="background-color:#b0c4de;">
 					<ul id="messages"></ul>
 				</div>
 			</div>
-			<form id="chatbox" role="form">
-				<div class="form-group">
-					<label for="message">Send a message from {{.UserData.name}}</label>
-					Or <a href="/logout">Sign Out</a>
-					<textarea id="message" class="form-control"></textarea>
-				</div>
+			<form id="chatbox" >
+				<textarea id="message" class="form-control" rows="2"></textarea>
 				<input type="submit" value="Submit" class="btn btn-default" />
 			</form>
 		</div>
@@ -31,6 +103,11 @@
 				var socket = null;
 				var msgBox = $("#chatbox textarea");
 				var messages = $("#messages");
+
+				// Adjust Window Size
+				hsize = $("body").height() - 20 - $(".form-control").height();
+				$(".panel-body").css("height", hsize + "px");
+
 				$("#chatbox").submit(function() {
 					if(!msgBox.val()) return false;
 					if(!socket) {
@@ -55,12 +132,21 @@
 								$("<img>").attr("title", msg.Name).css({
 									width : 50,
 									verticalAlign : "middle"
-								}).attr("src", msg.AvatarURL),
-								$("<span>").text(msg.Message)
+								}).attr("src", msg.AvatarURL).attr("class", "icon"),
+								$("<div>").attr("class", "bubble bubble-half-left")
+								.text(msg.Message)
 							)
 						);
+						$("#preview").animate(
+							{
+								scrollTop: $("#preview")[0].scrollHeight
+							}, 'fast');
 					}
 				}
+			});
+			$(window).resize(function() {
+				hsize = $("body").height() - 20 - $(".form-control").height();
+				$(".panel-body").css("height", hsize + "px");
 			});
 		</script>
 	</body>
